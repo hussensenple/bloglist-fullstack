@@ -125,4 +125,25 @@ blogsRouter.patch('/:id/like', async (request, response) => {
   }
 });
 
+// راوت مخصص لزيادة عدد اللايكات
+blogsRouter.patch('/:id/like', async (request, response) => {
+  try {
+    // السطر ده بيدور على المدونة بالـ ID وبيزود حقل اللايكات بمقدار 1
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      request.params.id,
+      { $inc: { likes: 1 } }, 
+      { new: true }
+    );
+    
+    if (updatedBlog) {
+      response.json(updatedBlog);
+    } else {
+      response.status(404).end();
+    }
+  } catch (error) {
+    console.error(error);
+    response.status(400).send({ error: 'malformatted id' });
+  }
+});
+
 module.exports = blogsRouter;
