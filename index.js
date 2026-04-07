@@ -12,8 +12,11 @@ app.use(express.static('dist'))
 
 app.use(middleware.tokenExtractor); 
 
-const mongoUrl = 'mongodb://localhost/bloglist';
-mongoose.connect(mongoUrl);
+const mongoUrl = 'mongodb://127.0.0.1:27017/bloglist';
+mongoose.connect(mongoUrl, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 app.use('/api/users', usersRouter);
 app.use('/api/blogs', blogsRouter);
