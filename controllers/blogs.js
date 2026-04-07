@@ -6,11 +6,16 @@ const blogsRouter = express.Router();
 
 blogsRouter.get('/', async (request, response) => {
   const searchTerm = request.query.search; 
+  const authorTerm = request.query.author; 
   
   let filter = {}; 
 
   if (searchTerm) {
     filter.title = { $regex: searchTerm, $options: 'i' };
+  }
+
+  if (authorTerm) {
+    filter.author = { $regex: authorTerm, $options: 'i' };
   }
 
   const blogs = await Blog.find(filter).populate('user', { username: 1, name: 1 });
@@ -26,7 +31,7 @@ blogsRouter.post('/', async (request, response) => {
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: body.likes || 0, 
+    likes: body.likes || 0,
     user: user._id 
   });
 
@@ -47,7 +52,6 @@ blogsRouter.patch('/:id/like', async (request, response) => {
     }
 
     blog.likes = blog.likes + 1;
-
     const updatedBlog = await blog.save();
     
     response.status(200).json(updatedBlog);
