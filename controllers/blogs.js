@@ -5,7 +5,15 @@ const User = require('../models/user');
 const blogsRouter = express.Router();
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 });
+  const searchTerm = request.query.search; 
+  
+  let filter = {}; 
+
+  if (searchTerm) {
+    filter.title = { $regex: searchTerm, $options: 'i' };
+  }
+
+  const blogs = await Blog.find(filter).populate('user', { username: 1, name: 1 });
   response.json(blogs);
 });
 
@@ -18,7 +26,7 @@ blogsRouter.post('/', async (request, response) => {
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: body.likes,
+    likes: body.likes || 0, 
     user: user._id 
   });
 
@@ -28,6 +36,28 @@ blogsRouter.post('/', async (request, response) => {
   await user.save();
 
   response.status(201).json(savedBlog);
+});
+
+blogsRouter.patch('/:id/like', async (request, response) => {
+  try {
+    const blog = await Blog.findById(request.params.id);
+
+    if (!blog) {
+      return response.status(404).json({ error: 'blog not found' });
+    }
+
+    blog.likes = blog.likes + 1;
+
+    const updatedBlog = await blog.save();
+    
+    response.status(200).json(updatedBlog);
+
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return response.status(400).json({ error: 'malformed id' });
+    }
+    response.status(500).json({ error: error.message });
+  }
 });
 
 module.exports = blogsRouter;
