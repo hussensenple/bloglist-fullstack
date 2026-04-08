@@ -12,7 +12,7 @@ app.use(express.static('dist'))
 
 app.use(middleware.tokenExtractor); 
 
-const mongoUrl = 'mongodb://localhost/bloglist';
+const mongoUrl = 'mongodb://127.0.0.1:27017/bloglist';
 mongoose.connect(mongoUrl);
 
 app.use('/api/users', usersRouter);
